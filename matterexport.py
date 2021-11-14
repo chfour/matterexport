@@ -74,5 +74,5 @@ for sweep in model_index["sweeps"]:
                         with open(file_path, "wb") as f: f.write(r.content)
                         a_hashes[f"{a}_{b}_{c}"] = tile_hash
                         break
-        with open("{sweep}/{a:0>2}/hashes.json", "w") as f:
+        with open(f"{sweep}/{a:0>2}/hashes.json", "w") as f:
             json.dump(a_hashes, f, separators=(',', ':'))
