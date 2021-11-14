@@ -53,7 +53,7 @@ for sweep in model_index["sweeps"]:
                         if os.path.exists(file_path):
                             print(" *  already downloaded")
                             with open(file_path, "rb") as f: tile_hash = hashlib.md5(f.read()).hexdigest()
-                            a_hashes[f"{a}_{b}_{c}"] = tile_hash
+                            a_hashes[f"{size}_{a}_{b}_{c}"] = tile_hash
                             print(f" *  md5: {tile_hash}")
                             break
                         
@@ -72,7 +72,7 @@ for sweep in model_index["sweeps"]:
                         print(f" *  {file_path}")
                         print(f" *  md5: {tile_hash}")
                         with open(file_path, "wb") as f: f.write(r.content)
-                        a_hashes[f"{a}_{b}_{c}"] = tile_hash
+                        a_hashes[f"{size}_{b}_{c}"] = tile_hash
                         break
         with open(f"{sweep}/{a:0>2}/hashes.json", "w") as f:
             json.dump(a_hashes, f, separators=(',', ':'))
