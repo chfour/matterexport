@@ -23,12 +23,18 @@ os.makedirs("tiles", exist_ok=True)
 os.chdir("tiles")
 
 for sweep in model_index["sweeps"]:
-    a_hashes = {}
     os.makedirs(sweep, exist_ok=True)
     
     for a in range(10):
         os.makedirs(f"{sweep}/{a:0>2}", exist_ok=True)
         
+        a_hashes = {}
+        if os.path.exists(f"{sweep}/{a:0>2}/hashes.json"):
+            try:
+                with open(f"{sweep}/{a:0>2}/hashes.json", "r") as f:
+                    a_hashes = json.load(f)
+            except:
+                print(" * couldn't load existing hashes.json")
         for b in range(10):
             print()
             
@@ -68,5 +74,5 @@ for sweep in model_index["sweeps"]:
                         with open(file_path, "wb") as f: f.write(r.content)
                         a_hashes[f"{a}_{b}_{c}"] = tile_hash
                         break
-        with open("hashes.json", "w") as f:
+        with open("{sweep}/{a:0>2}/hashes.json", "w") as f:
             json.dump(a_hashes, f, separators=(',', ':'))
