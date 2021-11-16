@@ -35,6 +35,8 @@ for sweep in model_index["sweeps"]:
                     a_hashes = json.load(f)
             except:
                 print(" * couldn't load existing hashes.json")
+        a_hashes["ignore"] = a_hashes.get("ignore", [])
+        
         for b in range(10):
             print()
             
@@ -52,14 +54,19 @@ for sweep in model_index["sweeps"]:
                         
                         if os.path.exists(file_path):
                             print(" *  already downloaded")
-                            with open(file_path, "rb") as f: tile_hash = hashlib.md5(f.read()).hexdigest()
-                            a_hashes[f"{size}_{b}_{c}"] = tile_hash
-                            print(f" *  md5: {tile_hash}")
+                            if f"{size}_{b}_{c}" not in a_hashes:
+                                with open(file_path, "rb") as f: tile_hash = hashlib.md5(f.read()).hexdigest()
+                                a_hashes[f"{size}_{b}_{c}"] = tile_hash
+                                print(f" *  md5 added: {tile_hash}")
+                            break
+                        elif f"{size}_{b}_{c}" in a_hashes.keys() or f"{size}_{b}_{c}" in a_hashes.get("ignore", []):
+                            print(" *  ignored")
                             break
                         
                         r = requests.get(cdn.replace("{{filename}}", f"tiles/{sweep}/{size}_face{a}_{b}_{c}.jpg"), headers={"accept": "image/jpeg"})
                         if not r.ok:
                             print(f" !  {r.status_code}")
+                            a_hashes["ignore"].append(f"{size}_{b}_{c}")
                             continue
                         else:
                             print(f" <- {r.status_code}")
@@ -67,6 +74,7 @@ for sweep in model_index["sweeps"]:
                         tile_hash = hashlib.md5(r.content).hexdigest()
                         if tile_hash in a_hashes.values():
                             print(" *  duplicate tile")
+                            a_hashes["ignore"].append(f"{size}_{b}_{c}")
                             break
                         
                         print(f" *  {file_path}")
@@ -74,5 +82,6 @@ for sweep in model_index["sweeps"]:
                         with open(file_path, "wb") as f: f.write(r.content)
                         a_hashes[f"{size}_{b}_{c}"] = tile_hash
                         break
-        with open(f"{sweep}/{a:0>2}/hashes.json", "w") as f:
-            json.dump(a_hashes, f, separators=(',', ':'))
+            
+            with open(f"{sweep}/{a:0>2}/hashes.json", "w") as f:
+                json.dump(a_hashes, f, separators=(',', ':'))
